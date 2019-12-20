@@ -52,6 +52,23 @@ app.get("/ping", async (req, res) => {
   }
 });
 
+// - - - - - - - - - - AUTHENTIFICATION - - - - - - - - - - - - - - - - - - - - -
+app.post("/authent", async (req, res) => {
+  console.log("authent demandee");
+  try {
+    if (req.fields.password === process.env.PASSWORD) {
+      console.log("authent ok");
+      res.status(200).json({ token: process.env.TOKEN });
+    } else {
+      console.log("authent nope");
+
+      res.status(200).json({ message: "authent fail" });
+    }
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 // - - - - - - - - - - DEVIS CREATION - - - - - - - - - - - - - - - - - - -
 app.post("/deviscreation", async (req, res) => {
   try {
@@ -61,14 +78,13 @@ app.post("/deviscreation", async (req, res) => {
     await devis.save();
 
     // Send an Email
-    console.log("creation OK, starting to send email");
+    console.log("creation OK, sending email");
     const data = {
       from: "Mailgun Sandbox <postmaster@" + DOMAIN + ">",
       to: "7anUDQ2A3MVJkC7J@gmail.com",
       subject: "Meilleur Taux Pierre, Dossier " + devis._id,
       text:
-        "Voici ton récapitulatif Meilleur Taux en JSON, débrouille toi avec " +
-        JSON.stringify(devis)
+        "Voici ton récapitulatif Meilleur Taux en JSON" + JSON.stringify(devis)
     };
     mg.messages().send(data, function(error, body) {
       console.log(body);
@@ -84,13 +100,23 @@ app.post("/deviscreation", async (req, res) => {
 });
 
 // - - - - - - - - - - GET ALL DEVIS - - - - - - - - - - - - - - - - - - -
-
 app.get("/getdevis", async (req, res) => {
   try {
     console.log("get all required");
     const alldevis = await Devis.find();
-    console.log(alldevis);
     res.status(200).json({ alldevis: alldevis });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+// - - - - - - - - - - DELETE ONE DEVIS - - - - - - - - - - - - - - - - - - -
+
+app.post("/deletedevis", async (req, res) => {
+  try {
+    console.log("delete ", req.fields.id);
+    const alldevis = await Devis.findOneAndDelete(req.fields.id);
+    res.status(200).json({ message: "deleted" });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
