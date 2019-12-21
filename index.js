@@ -81,7 +81,7 @@ app.post("/deviscreation", async (req, res) => {
     console.log("creation OK, sending email");
     const data = {
       from: "Mailgun Sandbox <postmaster@" + DOMAIN + ">",
-      to: "7anUDQ2A3MVJkC7J@gmail.com",
+      to: req.fields.email,
       subject: "Meilleur Taux Pierre, Dossier " + devis._id,
       text:
         "Voici ton récapitulatif Meilleur Taux en JSON" + JSON.stringify(devis)
